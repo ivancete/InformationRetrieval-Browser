@@ -2,7 +2,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
@@ -32,10 +31,9 @@ public class BusquedaLibre {
 
     }
 
-    public void busquedaLibre(ChoiceBox<String> campos, TextField contenido, IndexSearcher searcher, Stage window
-                                ) throws Exception{
+    public void busquedaLibre(ChoiceBox<String> campo, TextField contenido, IndexSearcher searcher) throws Exception{
 
-        if (campos.getValue() == "All Fields"){
+        if (campo.getValue() == "All Fields"){
 
             Query q1 = consulta.get(0).parse("title: "+contenido.getText());
 
@@ -49,15 +47,19 @@ public class BusquedaLibre {
 
             BooleanClause bc3 = new BooleanClause(q3,BooleanClause.Occur.SHOULD);
 
-            Query q4 = new TermQuery(new Term("keywords index",contenido.getText()));
+            //Pasamos la entrada a minúscula para realizar la búsqueda por el campo Keywords y Autor.
+
+            String contenidoMinuscula = contenido.getText().toLowerCase();
+
+            Query q4 = new TermQuery(new Term("keywords index",contenidoMinuscula));
 
             BooleanClause bc4 = new BooleanClause(q4,BooleanClause.Occur.SHOULD);
 
-            Query q5 = new TermQuery(new Term("keywords author",contenido.getText()));
+            Query q5 = new TermQuery(new Term("keywords author",contenidoMinuscula));
 
             BooleanClause bc5 = new BooleanClause(q5,BooleanClause.Occur.SHOULD);
 
-            Query q6 = new TermQuery(new Term("author",contenido.getText()));
+            Query q6 = new TermQuery(new Term("author",contenidoMinuscula));
 
             BooleanClause bc6 = new BooleanClause(q6,BooleanClause.Occur.SHOULD);
 
@@ -73,17 +75,17 @@ public class BusquedaLibre {
             BooleanQuery bq = bqbuilder.build();
 
             documentos = searcher.search(bq, 2000);
-
-            //System.out.println("Se han encontrado "+documentos.totalHits+" documentos.");
-
         }
-        else if (campos.getValue() == "Keywords"){
+        else if (campo.getValue() == "Keywords"){
 
-            Query q4 = new TermQuery(new Term("keywords index",contenido.getText()));
+            //Pasamos la entrada a minúscula para realizar la búsqueda por el campo Keywords.
+            String contenidoMinuscula = contenido.getText().toLowerCase();
+
+            Query q4 = new TermQuery(new Term("keywords index",contenidoMinuscula));
 
             BooleanClause bcKewywordsIndex = new BooleanClause(q4,BooleanClause.Occur.SHOULD);
 
-            Query q5 = new TermQuery(new Term("keywords author",contenido.getText()));
+            Query q5 = new TermQuery(new Term("keywords author",contenidoMinuscula));
 
             BooleanClause bcKewywordsAuthor = new BooleanClause(q5,BooleanClause.Occur.SHOULD);
 
@@ -95,29 +97,27 @@ public class BusquedaLibre {
             BooleanQuery bq = bqbuilder.build();
 
             documentos = searcher.search(bq, 2000);
-
-            //System.out.println("Se han encontrado  "+documentos.totalHits+" documentos para los campo Keywords.");
-
         }
         else{
 
-            String campo = campos.getValue().toLowerCase();
+            //Pasamos la entrada a minúscula para realizar la búsqueda por el campo Autor.
+            String campoABuscar = campo.getValue().toLowerCase();
 
-            if (campos.getValue() == "Title")
-                query = consulta.get(0).parse(campo+":"+contenido.getText());
-            else if (campos.getValue() == "Abstract")
-                query = consulta.get(1).parse(campo+":"+contenido.getText());
-            else if (campos.getValue() == "Source")
-                query = consulta.get(2).parse(campo+":"+contenido.getText());
-            else
-                query = new TermQuery(new Term("author",contenido.getText()));
+            if (campo.getValue() == "Title")
+                query = consulta.get(0).parse(campoABuscar+": "+contenido.getText());
+            else if (campo.getValue() == "Abstract")
+                query = consulta.get(1).parse(campoABuscar+": "+contenido.getText());
+            else if (campo.getValue() == "Source")
+                query = consulta.get(2).parse(campoABuscar+": "+contenido.getText());
+            else{
+                String contenidoMinuscula = contenido.getText().toLowerCase();
+                query = new TermQuery(new Term("author",contenidoMinuscula));
+            }
 
             documentos = searcher.search(query, 2000);
-
-            /*System.out.println("Se han encontrado  "+documentos.totalHits+" documentos para el campo "+campo+
-            " con la búsqueda "+contenido.getText());*/
-
         }
+
+        //System.out.println("Se han encontrado  "+documentos.totalHits+" documentos.");
 
         ObservableList<Documento> listaResultados = FXCollections.observableArrayList();
 
@@ -130,7 +130,7 @@ public class BusquedaLibre {
                     Integer.parseInt(d.get("cited by"))));
         }
 
-        escenaResultados.crearTablaDatos(window, listaResultados);
+        escenaResultados.crearTablaDatos(listaResultados);
 
     }
 }

@@ -1,25 +1,19 @@
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
-
-
-public class EscenaResultadosTexto implements EventHandler<ActionEvent> {
+public class EscenaResultadosTexto{
 
     TableView<Documento> tablaDocumentos;
     Button botonVolver;
+    Label totalDocumentosRescatados;
 
     public EscenaResultadosTexto(){
-    }
-
-    public void crearTablaDatos(Stage window, ObservableList<Documento> listaDocumentos){
 
         TableColumn<Documento, String> autoresCol = new TableColumn<>("Author");
         autoresCol.setCellValueFactory(new PropertyValueFactory<>("autores"));
@@ -50,31 +44,36 @@ public class EscenaResultadosTexto implements EventHandler<ActionEvent> {
 
         tablaDocumentos = new TableView<>();
 
-        tablaDocumentos.setItems(listaDocumentos);
-
         tablaDocumentos.getColumns().addAll(autoresCol,tituloCol,resumenCol, fuenteCol, linkCol, palabrasClaveAutorCol,
                 palabrasClaveIndiceCol, fechaPublicacionCol, citadoPorCol);
 
         tablaDocumentos.setEditable(false);
+    }
+
+    public void crearTablaDatos(ObservableList<Documento> listaDocumentos) throws Exception{
+
+        tablaDocumentos.setItems(listaDocumentos);
 
         VBox root = new VBox();
         root.getChildren().add(tablaDocumentos);
 
         botonVolver = new Button("Volver a buscar");
+
+        //Recuperamos la escena principal, y decimos que si se presiona el boton de volver, se vuelva a cargar esa escena.
+        Scene escena = EscenaPrincipal.devolverEscena().devolverContenidoEscena();
+
+        botonVolver.setOnAction(e -> InterfazUsuario.window.setScene(escena));
+
         root.getChildren().add(botonVolver);
+
+        totalDocumentosRescatados = new Label("Total documentos encontrados: "+Integer.toString(listaDocumentos.size()));
+
+        root.getChildren().add(totalDocumentosRescatados);
 
         Scene escenaTablaDatos = new Scene(root);
 
-        window.setScene(escenaTablaDatos);
-        window.show();
-    }
-
-    @Override
-    public void handle(ActionEvent event){
-
-        if (event.getSource()==botonVolver){
-
-        }
+        InterfazUsuario.window.setScene(escenaTablaDatos);
+        InterfazUsuario.window.show();
     }
 }
 
