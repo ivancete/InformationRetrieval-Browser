@@ -34,18 +34,14 @@ public class BusquedaBooleana {
 
     BooleanQuery.Builder bqbuilder;
 
-    BooleanQuery bq;
+    ObservableList<Documento> listaResultados;
 
 
     public BusquedaBooleana(){
 
         plan = new GridPane();
 
-        clausulasBooleanas = new ArrayList<>();
-
         escenaResultados = new EscenaResultadosTexto();
-
-        bqbuilder = new BooleanQuery.Builder();
 
         consulta = new ArrayList<>();
 
@@ -88,7 +84,7 @@ public class BusquedaBooleana {
             GridPane.setConstraints(etiquetaTextoCited2, 3, total + 3);
 
             cbCampos.add(new ChoiceBox(FXCollections.observableArrayList(
-                    "All Fields", "Title", "Abstract", "Author", "Source")
+                    "All Fields", "Title", "Abstract", "Author" , "Source", "Keywords")
             ));
 
             cbCampos.get(total).setId("cbNormal" + total);
@@ -162,6 +158,7 @@ public class BusquedaBooleana {
             cbCampos.remove(total - 1);
             campoTextoBuscar.remove(total - 1);
             cbBooleanos.remove(total - 2);
+
         }catch (Exception e){
 
             etiquetaError = new Label("Se ha producido un error al decrementar las cajas de búsqueda.");
@@ -173,6 +170,15 @@ public class BusquedaBooleana {
         }
     }
 
+    public void inicializarVolverBuscar(){
+
+        bqbuilder = new BooleanQuery.Builder();
+
+        clausulasBooleanas = new ArrayList<>();
+
+        listaResultados = FXCollections.observableArrayList();
+    }
+
     //Función que nos permite realizar la búsqueda booleana.
     public void busquedaBooleana(ArrayList<ChoiceBox<String> > cbCampos,
                                  ArrayList<TextField> campoTextoBuscar,
@@ -181,33 +187,40 @@ public class BusquedaBooleana {
 
         try{
 
+            inicializarVolverBuscar();
+
             int i = -1;
             String valorLogico = "AND";
 
-            for (ChoiceBox<String> campo : cbBooleanos){
+            for (ChoiceBox<String> campo : cbCampos){
 
                 if (i != -1){
                     valorLogico = cbBooleanos.get(i).getValue();
                 }
 
-                crearConsulta(campoTextoBuscar.get(i+1), valorLogico, cbCampos.get(i+1).getValue());
+                crearConsulta(campoTextoBuscar.get(i+1), valorLogico, campo.getValue());
 
                 i++;
             }
 
-            bq = bqbuilder.build();
+            for (BooleanClause bc : clausulasBooleanas){
+                System.out.println(bc.toString());
+                bqbuilder.add(bc);
+            }
+
+            BooleanQuery bq = bqbuilder.build();
 
             documentos = searcher.search(bq, 2000);
 
-            ObservableList<Documento> listaResultados = FXCollections.observableArrayList();
+            System.out.println(documentos.totalHits+" TOTAL");
 
             for (ScoreDoc sd : documentos.scoreDocs){
 
                 Document d = searcher.doc(sd.doc);
 
                 listaResultados.add(new Documento(d.get("author"), d.get("title"), d.get("abstract"), d.get("source"),
-                        d.get("link"), d.get("keywords author"), d.get("keywords index"), Integer.parseInt(d.get("year")),
-                        Integer.parseInt(d.get("cited by"))));
+                        d.get("link"), d.get("keywords author"), d.get("keywords index"),
+                        Integer.parseInt(d.get("year")), Integer.parseInt(d.get("cited by"))));
             }
 
             escenaResultados.crearTablaDatos(listaResultados);
@@ -224,6 +237,8 @@ public class BusquedaBooleana {
         }
     }
 
+    //Función que se encarga de dirigir hacia adonde va la consulta.
+    //Crea una consulta u otra dependiendo el valor de la variable CAMPO.
     public void crearConsulta(TextField contenido, String valorLogico, String campo) throws Exception{
 
         //En este primer bloque comprobamos que operador lógico requiere la subconsulta.
@@ -245,8 +260,11 @@ public class BusquedaBooleana {
         else if (campo == "Source"){
             crearConsultaFuente(contenido, operadorLogico);
         }
-        else if (campo == "Keywords"){
-            crearConsultaPalabrasClave(contenido,operadorLogico);
+        else if (campo == "Keywords Index"){
+            crearConsultaPalabrasClaveIndex(contenido,operadorLogico);
+        }
+        else if (campo == "Keywords Author"){
+            crearConsultaPalabrasClaveAutor(contenido,operadorLogico);
         }
         else if (campo == "Author"){
             crearConsultaAutor(contenido, operadorLogico);
@@ -324,7 +342,6 @@ public class BusquedaBooleana {
             InterfazUsuario.window.setTitle("Error");
             InterfazUsuario.window.show();
         }
-
     }
 
     public void crearConsultaResumen(TextField contenido, BooleanClause.Occur operadorLogico) throws Exception{
@@ -353,7 +370,7 @@ public class BusquedaBooleana {
 
         try{
 
-            Query q = new TermQuery(new Term("author",contenido.getText()));
+            Query q = new TermQuery(new Term("author",contenido.getText().toLowerCase()));
 
             clausulasBooleanas.add(new BooleanClause(q,operadorLogico));
 
@@ -371,21 +388,41 @@ public class BusquedaBooleana {
 
     }
 
-    public void crearConsultaPalabrasClave(TextField contenido, BooleanClause.Occur operadorLogico) throws Exception{
+    public void crearConsultaPalabrasClaveIndex(TextField contenido, BooleanClause.Occur operadorLogico) throws Exception{
 
         try{
 
-            Query q = new TermQuery(new Term("keywords index",contenido.getText()));
+            Query q = new TermQuery(new Term("keywords index",contenido.getText().toLowerCase()));
 
             clausulasBooleanas.add(new BooleanClause(q,operadorLogico));
 
-            Query q2 = new TermQuery(new Term("keywords author",contenido.getText()));
-
-            clausulasBooleanas.add(new BooleanClause(q2,operadorLogico));
+            bqbuilder.add(clausulasBooleanas.get(clausulasBooleanas.size()-1));
 
         }catch (Exception e){
 
-            etiquetaError = new Label("Se ha producido un error al crear la consulta para las palabras claves.");
+            etiquetaError = new Label("Se ha producido un error al crear la consulta para las palabras claves index.");
+            plan.getChildren().add(etiquetaError);
+            escenaErrorBusquedaBooleana = new Scene(plan,400,400);
+            InterfazUsuario.window.setScene(escenaErrorBusquedaBooleana);
+            InterfazUsuario.window.setTitle("Error");
+            InterfazUsuario.window.show();
+        }
+
+    }
+
+    public void crearConsultaPalabrasClaveAutor(TextField contenido, BooleanClause.Occur operadorLogico) throws Exception{
+
+        try{
+
+            Query q2 = new TermQuery(new Term("keywords author",contenido.getText().toLowerCase()));
+
+            clausulasBooleanas.add(new BooleanClause(q2,operadorLogico));
+
+            bqbuilder.add(clausulasBooleanas.get(clausulasBooleanas.size()-1));
+
+        }catch (Exception e){
+
+            etiquetaError = new Label("Se ha producido un error al crear la consulta para las palabras claves autor.");
             plan.getChildren().add(etiquetaError);
             escenaErrorBusquedaBooleana = new Scene(plan,400,400);
             InterfazUsuario.window.setScene(escenaErrorBusquedaBooleana);

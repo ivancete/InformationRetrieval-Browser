@@ -20,12 +20,12 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
     BusquedaLibre busquedaLibre;
     BusquedaBooleana busquedaBooleana;
 
+    ScrollPane barraScrollVertical;
+    GridPane layout;
+
     Scene scene;
 
     Button botonBuscar, botonMas, botonMenos;
-
-    ScrollPane barraScrollVertical;
-    GridPane layout;
     ArrayList<ChoiceBox<String> > cbCampos;
     ArrayList<ChoiceBox<String> > cbBooleanos;
     ArrayList<TextField> campoTextoBuscar;
@@ -67,6 +67,7 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
         barraScrollVertical.setContent(layout);
 
         scene = new Scene(barraScrollVertical, 800, 600);
+        scene.getStylesheets().add("estiloEscenaPrincipal.css");
     }
 
     final static public EscenaPrincipal devolverEscena() throws Exception{
@@ -141,7 +142,7 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
     public void crearChoiceBox(GridPane layout){
 
         cbCampos.add(new ChoiceBox(FXCollections.observableArrayList(
-                "All Fields", "Title", "Abstract", "Author" , "Source", "Keywords")
+                "All Fields", "Title", "Abstract", "Author" , "Source", "Keywords Index", "Keywords Author")
         ));
 
         cbCampos.get(0).setId("cbNormal0");
