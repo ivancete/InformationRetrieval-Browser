@@ -84,7 +84,7 @@ public class BusquedaBooleana {
             GridPane.setConstraints(etiquetaTextoCited2, 3, total + 3);
 
             cbCampos.add(new ChoiceBox(FXCollections.observableArrayList(
-                    "All Fields", "Title", "Abstract", "Author" , "Source", "Keywords")
+                    "All Fields", "Title", "Abstract", "Author" , "Source", "Keywords Index", "Keywords Author")
             ));
 
             cbCampos.get(total).setId("cbNormal" + total);

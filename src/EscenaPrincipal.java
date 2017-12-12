@@ -99,7 +99,8 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
 
             try {
 
-                busquedaLibre.busquedaLibre(cbCampos.get(0), campoTextoBuscar.get(0), searcher);
+                busquedaLibre.busquedaLibre(cbCampos.get(0), campoTextoBuscar.get(0), campoTextoPublished1, campoTextoPublished2,
+                        campoTextoCited1, campoTextoCited2, searcher);
 
             }catch (Exception e){
 
