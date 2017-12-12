@@ -5,6 +5,7 @@ import javafx.scene.control.TextField;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.facet.FacetsCollector;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
@@ -18,8 +19,6 @@ public class BusquedaLibre {
     ArrayList<QueryParser> consulta;
 
     TopDocs documentos;
-
-    BooleanQuery bq;
 
     BooleanQuery.Builder bqbuilder;
 
@@ -48,32 +47,43 @@ public class BusquedaLibre {
 
     public void busquedaLibre(ChoiceBox<String> campo, TextField contenido,  TextField campoTextoPublished1,
                               TextField campoTextoPublished2, TextField campoTextoCited1,
-                              TextField campoTextoCited2, IndexSearcher searcher) throws Exception{
+                              TextField campoTextoCited2) throws Exception{
 
         inicializarVolverBuscar();
+
 
         String campoABuscar = campo.getValue().toString();
 
         crearConsulta(contenido, campoABuscar, campoTextoPublished1, campoTextoPublished2, campoTextoCited1,
-                campoTextoCited2, searcher);
+                campoTextoCited2);
+
+
+        EscenaPrincipal.bq = bqbuilder.build();
+
+        FacetsCollector colectorFacetas = new FacetsCollector();
+
+        documentos = FacetsCollector.search(EscenaPrincipal.searcher, EscenaPrincipal.bq, 100, colectorFacetas);
+
+
 
 
         for (ScoreDoc sd : documentos.scoreDocs){
 
-            Document d = searcher.doc(sd.doc);
+            Document d = EscenaPrincipal.searcher.doc(sd.doc);
 
             listaResultados.add(new Documento(d.get("author"), d.get("title"), d.get("abstract"), d.get("source"),
                     d.get("link"), d.get("keywords author"), d.get("keywords index"), Integer.parseInt(d.get("year")),
                     Integer.parseInt(d.get("cited by"))));
         }
 
-        escenaResultados.crearTablaDatos(listaResultados);
+
+        escenaResultados.crearTablaDatos(listaResultados, colectorFacetas);
 
     }
 
     public void crearConsulta(TextField contenido, String campo,TextField campoTextoPublished1,
                               TextField campoTextoPublished2, TextField campoTextoCited1,
-                              TextField campoTextoCited2, IndexSearcher searcher) throws Exception{
+                              TextField campoTextoCited2) throws Exception{
 
         crearConsultaRangoPublicacion(campoTextoPublished1, campoTextoPublished2);
         crearConsultaRangoCitas(campoTextoCited1, campoTextoCited2);
@@ -100,11 +110,6 @@ public class BusquedaLibre {
         else {
             crearConsultaTodosCampos(contenido);
         }
-
-        bq = bqbuilder.build();
-
-        documentos = searcher.search(bq, 2000);
-
     }
 
     public void crearConsultaTitulo(TextField contenido) throws Exception{

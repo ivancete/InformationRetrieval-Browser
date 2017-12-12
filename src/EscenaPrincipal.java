@@ -5,8 +5,12 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.facet.taxonomy.TaxonomyReader;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.FSDirectory;
 
@@ -31,17 +35,30 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
     ArrayList<TextField> campoTextoBuscar;
     TextField campoTextoPublished1, campoTextoPublished2, campoTextoCited1, campoTextoCited2;
     Label etiquetaTextoPublished1, etiquetaTextoPublished2, etiquetaTextoCited1, etiquetaTextoCited2;
-    IndexSearcher searcher;
-    IndexReader reader;
-    FSDirectory directorioIndice;
+
+    //Variables para leer del indice.
+    static IndexSearcher searcher;
+    static IndexReader reader;
+    static FSDirectory directorioIndice;
+    static FSDirectory taxodir;
+    static TaxonomyReader taxonomyReader;
+    static FacetsConfig fconfig;
+
+    static BooleanQuery bq;
 
     public EscenaPrincipal() throws Exception{
 
         directorioIndice = FSDirectory.open(Paths.get(System.getProperty("user.dir") + "/indice/"));
 
+        taxodir = FSDirectory.open(Paths.get(System.getProperty("user.dir") + "/facetas/"));
+
         reader = DirectoryReader.open(directorioIndice);
 
         searcher = new IndexSearcher(reader);
+
+        taxonomyReader = new DirectoryTaxonomyReader(taxodir);
+
+        fconfig = new FacetsConfig();
 
         busquedaLibre = new BusquedaLibre();
         busquedaBooleana = new BusquedaBooleana();
@@ -89,7 +106,7 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
         if (event.getSource()==botonBuscar && cbBooleanos.size() > 0){
 
             try {
-                busquedaBooleana.busquedaBooleana(cbCampos, campoTextoBuscar, cbBooleanos, searcher);
+                busquedaBooleana.busquedaBooleana(cbCampos, campoTextoBuscar, cbBooleanos);
             }catch (Exception e){
 
             }
@@ -100,7 +117,7 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
             try {
 
                 busquedaLibre.busquedaLibre(cbCampos.get(0), campoTextoBuscar.get(0), campoTextoPublished1, campoTextoPublished2,
-                        campoTextoCited1, campoTextoCited2, searcher);
+                        campoTextoCited1, campoTextoCited2);
 
             }catch (Exception e){
 

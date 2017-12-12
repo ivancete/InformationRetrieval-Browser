@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.facet.FacetsCollector;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
@@ -182,8 +183,7 @@ public class BusquedaBooleana {
     //Función que nos permite realizar la búsqueda booleana.
     public void busquedaBooleana(ArrayList<ChoiceBox<String> > cbCampos,
                                  ArrayList<TextField> campoTextoBuscar,
-                                 ArrayList<ChoiceBox<String> > cbBooleanos,
-                                 IndexSearcher searcher){
+                                 ArrayList<ChoiceBox<String> > cbBooleanos){
 
         try{
 
@@ -203,27 +203,23 @@ public class BusquedaBooleana {
                 i++;
             }
 
-            for (BooleanClause bc : clausulasBooleanas){
-                System.out.println(bc.toString());
-                bqbuilder.add(bc);
-            }
 
-            BooleanQuery bq = bqbuilder.build();
+            EscenaPrincipal.bq = bqbuilder.build();
 
-            documentos = searcher.search(bq, 2000);
+            FacetsCollector colectorFacetas = new FacetsCollector();
 
-            System.out.println(documentos.totalHits+" TOTAL");
+            documentos = FacetsCollector.search(EscenaPrincipal.searcher, EscenaPrincipal.bq, 100, colectorFacetas);
 
             for (ScoreDoc sd : documentos.scoreDocs){
 
-                Document d = searcher.doc(sd.doc);
+                Document d = EscenaPrincipal.searcher.doc(sd.doc);
 
                 listaResultados.add(new Documento(d.get("author"), d.get("title"), d.get("abstract"), d.get("source"),
                         d.get("link"), d.get("keywords author"), d.get("keywords index"),
                         Integer.parseInt(d.get("year")), Integer.parseInt(d.get("cited by"))));
             }
 
-            escenaResultados.crearTablaDatos(listaResultados);
+            escenaResultados.crearTablaDatos(listaResultados,colectorFacetas);
 
 
         }catch (Exception e){
