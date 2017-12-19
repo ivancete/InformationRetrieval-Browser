@@ -2,9 +2,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
@@ -14,6 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EscenaResultadosTexto{
+
+    Stage ventana;
+    ScrollPane barraScrollVertical;
+
+    Label etiquetaError;
+
+    //Este es el plan para cuando ocurre un error.
+    GridPane plan;
 
     TableView<Documento> tablaDocumentos;
 
@@ -27,15 +41,28 @@ public class EscenaResultadosTexto{
     ArrayList<TitledPane> tituloPanel;
 
     HBox escenaHorizontal;
+    VBox escenaVerticalFacetas;
 
     Scene escenaTablaDatos;
 
+    ScrollPane sp;
+
     public EscenaResultadosTexto(){
 
-        contenido = new ArrayList<>();
-        tituloPanel = new ArrayList<>();
+        ventana = new Stage();
+
+        plan = new GridPane();
+
+        //Parte de las facetas
 
         escenaHorizontal = new HBox();
+        escenaHorizontal.minWidth(600);
+        escenaVerticalFacetas  = new VBox();
+
+        sp = new ScrollPane();
+
+        sp.setContent(escenaVerticalFacetas);
+        //____________________________________________________________
 
         TableColumn<Documento, String> autoresCol = new TableColumn<>("Author");
         autoresCol.setCellValueFactory(new PropertyValueFactory<>("autores"));
@@ -65,47 +92,145 @@ public class EscenaResultadosTexto{
         citadoPorCol.setCellValueFactory(new PropertyValueFactory<>("citadoPor"));
 
         tablaDocumentos = new TableView<>();
+
+        //Código para mostrar una fila en otra escena diferente.
+        tablaDocumentos.setRowFactory(tv -> {
+            TableRow<Documento> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (! row.isEmpty() && event.getButton()== MouseButton.PRIMARY
+                        && event.getClickCount() == 2) {
+
+                    Documento clickedRow = row.getItem();
+                    mostrarFila(clickedRow);
+                }
+            });
+            return row ;
+        });
+
         botonVolver = new Button("Volver a buscar");
 
         totalDocumentosRescatados = new Label();
-
-        escenaHorizontal.getChildren().add(totalDocumentosRescatados);
-
-        escenaHorizontal.getChildren().add(botonVolver);
 
         tablaDocumentos.getColumns().addAll(autoresCol,tituloCol,resumenCol, fuenteCol, linkCol, palabrasClaveAutorCol,
                 palabrasClaveIndiceCol, fechaPublicacionCol, citadoPorCol);
 
         tablaDocumentos.setEditable(false);
 
-        escenaHorizontal.getChildren().add(tablaDocumentos);
+        escenaHorizontal.getChildren().setAll(totalDocumentosRescatados, botonVolver, tablaDocumentos, sp);
 
         escenaTablaDatos = new Scene(escenaHorizontal);
     }
 
+    public void mostrarFila(Documento clickedRow){
+
+
+        Label autor;
+        if (clickedRow.getFuente() != null)
+            autor = new Label("Autores:: "+clickedRow.getAutores());
+        else
+            autor = new Label("Autores: No hay autores.");
+
+        Label resumen;
+        if (clickedRow.getFuente() != null)
+            resumen = new Label("Resumen:: "+clickedRow.getResumen());
+        else
+            resumen = new Label("Resumen: No hay resumen.");
+
+        Label titulo;
+        if (clickedRow.getFuente() != null)
+            titulo = new Label("Título:: "+clickedRow.getTitulo());
+        else
+            titulo = new Label("Título: No hay título.");
+
+
+        Label citas = new Label("Cited by: "+Integer.toString(clickedRow.getCitadoPor()));
+        Label anio = new Label("Año: "+Integer.toString(clickedRow.getFechaPublicacion()));
+
+
+        Label keywords;
+        if (clickedRow.getPalabrasClaveAutor() != null && clickedRow.getPalabrasClaveIndice() != null )
+            keywords = new Label("Keywords: "+clickedRow.getPalabrasClaveAutor() + clickedRow.getPalabrasClaveIndice());
+        else if (clickedRow.getPalabrasClaveAutor() == null && clickedRow.getPalabrasClaveIndice() != null )
+            keywords = new Label("Keywords: " + clickedRow.getPalabrasClaveIndice());
+        else if (clickedRow.getPalabrasClaveAutor() != null && clickedRow.getPalabrasClaveIndice() == null )
+            keywords = new Label("Keywords: " + clickedRow.getPalabrasClaveAutor());
+        else
+            keywords = new Label("Keywords:  No hay Keywords." );
+
+        Label link;
+        if (clickedRow.getLink() != null)
+            link = new Label("Link: "+clickedRow.getLink());
+        else
+            link = new Label("Link: No hay link.");
+
+        Label source;
+        if (clickedRow.getFuente() != null)
+            source = new Label("Source: "+clickedRow.getFuente());
+        else
+            source = new Label("Source: No hay fuente.");
+
+
+
+        plan = new GridPane();
+
+        plan.setHgap(10);
+        plan.setVgap(10);
+        GridPane.setConstraints(titulo, 1,1);
+        GridPane.setConstraints(autor, 1,2);
+        GridPane.setConstraints(resumen, 1,3);
+        GridPane.setConstraints(anio, 1,4);
+        GridPane.setConstraints(citas, 1,5);
+        GridPane.setConstraints(keywords, 1,6);
+        GridPane.setConstraints(link, 1,7);
+        GridPane.setConstraints(source, 1,8);
+
+        plan.getChildren().setAll(autor, resumen, titulo, citas, anio, keywords, link, source);
+        barraScrollVertical = new ScrollPane();
+        barraScrollVertical.setContent(plan);
+        barraScrollVertical.setContent(plan);
+        escenaTablaDatos = new Scene(barraScrollVertical, 600, 600);
+        ventana.setScene(escenaTablaDatos);
+        ventana.show();
+
+    }
+
     public void crearTablaDatos(ObservableList<Documento> listaDocumentos, FacetsCollector colectorFacetas) throws Exception{
 
-        facetas = new FastTaxonomyFacetCounts(EscenaPrincipal.taxonomyReader,EscenaPrincipal.fconfig, colectorFacetas);
+        try{
 
-        todasDimensiones = facetas.getAllDims(2000);
+            facetas = new FastTaxonomyFacetCounts(EscenaPrincipal.taxonomyReader,EscenaPrincipal.fconfig, colectorFacetas);
 
-        crearZonaFacetas();
+            todasDimensiones = facetas.getAllDims(2000);
 
-        Scene escena = EscenaPrincipal.devolverEscena().devolverContenidoEscena();
+            crearZonaFacetas();
 
-        botonVolver.setOnAction(e -> InterfazUsuario.window.setScene(escena));
+            Scene escena = EscenaPrincipal.devolverEscena().devolverContenidoEscena();
 
-        totalDocumentosRescatados.setText("Total documentos encontrados: "+Integer.toString(listaDocumentos.size()));
+            botonVolver.setOnAction(e -> InterfazUsuario.window.setScene(escena));
 
-        tablaDocumentos.setItems(listaDocumentos);
+            totalDocumentosRescatados.setText("Total documentos encontrados: "+Integer.toString(listaDocumentos.size()));
 
-        InterfazUsuario.window.setScene(escenaTablaDatos);
-        InterfazUsuario.window.show();
+            tablaDocumentos.setItems(listaDocumentos);
+
+            InterfazUsuario.window.setScene(escenaTablaDatos);
+            InterfazUsuario.window.show();
+
+        }catch (Exception e){
+
+            etiquetaError = new Label("Se ha producido un error al intentar crear la tabla con los resultados de la búsqueda.");
+            plan.getChildren().setAll(etiquetaError);
+            escenaTablaDatos = new Scene(plan,400,400);
+            InterfazUsuario.window.setScene(escenaTablaDatos);
+            InterfazUsuario.window.setTitle("Error");
+            InterfazUsuario.window.show();
+        }
     }
 
     public void bajarDimension(String campo, String etiqueta){
 
         try {
+
+            int anio, citedby;
 
             DrillDownQuery dq = new DrillDownQuery(EscenaPrincipal.fconfig, EscenaPrincipal.bq);
 
@@ -122,9 +247,21 @@ public class EscenaResultadosTexto{
 
                 Document d = EscenaPrincipal.searcher.doc(sd.doc);
 
+                anio = 0;
+                if (d.get("year") != null) {
+                    anio = Integer.parseInt(d.get("year"));
+
+                }
+
+                citedby = 0;
+                if (d.get("cited by") != null) {
+                    citedby = Integer.parseInt(d.get("cited by"));
+
+                }
+
                 listaDocumentos.add(new Documento(d.get("author"), d.get("title"), d.get("abstract"), d.get("source"),
-                        d.get("link"), d.get("keywords author"), d.get("keywords index"), Integer.parseInt(d.get("year")),
-                        Integer.parseInt(d.get("cited by"))));
+                        d.get("link"), d.get("keywords author"), d.get("keywords index"), anio,
+                        citedby));
             }
 
             tablaDocumentos.setItems(listaDocumentos);
@@ -132,7 +269,12 @@ public class EscenaResultadosTexto{
             totalDocumentosRescatados.setText("Total documentos encontrados: "+Integer.toString(listaDocumentos.size()));
 
         }catch (Exception e){
-            System.out.println("ERROOOOOR");
+            etiquetaError = new Label("Se ha producido un error al intentar acceder una faceta.");
+            plan.getChildren().setAll(etiquetaError);
+            escenaTablaDatos = new Scene(plan,400,400);
+            InterfazUsuario.window.setScene(escenaTablaDatos);
+            InterfazUsuario.window.setTitle("Error");
+            InterfazUsuario.window.show();
         }
 
     }
@@ -140,6 +282,10 @@ public class EscenaResultadosTexto{
     public void crearZonaFacetas() throws Exception{
 
         try {
+
+            contenido = new ArrayList<>();
+            tituloPanel = new ArrayList<>();
+
             Button boton;
 
             int i = 0;
@@ -150,7 +296,6 @@ public class EscenaResultadosTexto{
 
                     tituloPanel.add(new TitledPane());
                     tituloPanel.get(i).setText(fr.dim);
-                    tituloPanel.get(i).setMaxWidth(200);
                     tituloPanel.get(i).setExpanded(false);
 
                     contenido.add(new VBox());
@@ -168,21 +313,18 @@ public class EscenaResultadosTexto{
 
                     i++;
                 }
-
             }
 
-            VBox escenaVerticalFacetas = new VBox();
-
-            escenaVerticalFacetas.getChildren().addAll(tituloPanel);
-
-            ScrollPane sp = new ScrollPane();
-
-            sp.setContent(escenaVerticalFacetas);
-
-            escenaHorizontal.getChildren().add(sp);
+            escenaVerticalFacetas.getChildren().setAll(tituloPanel);
         }
+
         catch (Exception e){
-            System.out.println("ERROOOOOR");
+            etiquetaError = new Label("Se ha producido un error al intentar crear la columna con facetas.");
+            plan.getChildren().setAll(etiquetaError);
+            escenaTablaDatos = new Scene(plan,400,400);
+            InterfazUsuario.window.setScene(escenaTablaDatos);
+            InterfazUsuario.window.setTitle("Error");
+            InterfazUsuario.window.show();
         }
 
     }

@@ -48,9 +48,9 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
 
     public EscenaPrincipal() throws Exception{
 
-        directorioIndice = FSDirectory.open(Paths.get(System.getProperty("user.dir") + "/indice/"));
+        directorioIndice = FSDirectory.open(Paths.get(System.getProperty("user.dir") + "/indiceNuevo/"));
 
-        taxodir = FSDirectory.open(Paths.get(System.getProperty("user.dir") + "/facetas/"));
+        taxodir = FSDirectory.open(Paths.get(System.getProperty("user.dir") + "/facetasNuevo/"));
 
         reader = DirectoryReader.open(directorioIndice);
 
@@ -187,13 +187,13 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
         campoTextoPublished1.setId("fieldPublished0");
         campoTextoPublished1.setMaxWidth(50);
         campoTextoPublished1.setPrefWidth(50);
-        GridPane.setConstraints(campoTextoPublished1, 2,5);
+        GridPane.setConstraints(campoTextoPublished1, 2,20);
 
         campoTextoPublished2 = new TextField();
         campoTextoPublished2.setId("fieldPublished1");
         campoTextoPublished2.setMaxWidth(50);
         campoTextoPublished2.setPrefWidth(50);
-        GridPane.setConstraints(campoTextoPublished2, 4,5);
+        GridPane.setConstraints(campoTextoPublished2, 4,20);
 
         layout.getChildren().addAll(campoTextoPublished1, campoTextoPublished2);
     }
@@ -203,13 +203,13 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
         campoTextoCited1.setId("fieldCited0");
         campoTextoCited1.setMaxWidth(50);
         campoTextoCited1.setPrefWidth(50);
-        GridPane.setConstraints(campoTextoCited1, 2,6);
+        GridPane.setConstraints(campoTextoCited1, 2,21);
 
         campoTextoCited2 = new TextField();
         campoTextoCited2.setId("fieldCited1");
         campoTextoCited2.setMaxWidth(50);
         campoTextoCited2.setPrefWidth(50);
-        GridPane.setConstraints(campoTextoCited2, 4,6);
+        GridPane.setConstraints(campoTextoCited2, 4,21);
 
         layout.getChildren().addAll(campoTextoCited1, campoTextoCited2);
     }
@@ -218,19 +218,19 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
 
         etiquetaTextoPublished1 = new Label("Published");
         etiquetaTextoPublished1.setId("labelPublished0");
-        GridPane.setConstraints(etiquetaTextoPublished1, 1,5);
+        GridPane.setConstraints(etiquetaTextoPublished1, 1,20);
 
         etiquetaTextoPublished2 = new Label("to");
         etiquetaTextoPublished2.setId("labelPublished1");
-        GridPane.setConstraints(etiquetaTextoPublished2, 3,5);
+        GridPane.setConstraints(etiquetaTextoPublished2, 3,20);
 
         etiquetaTextoCited1 = new Label("Cited by");
         etiquetaTextoCited1.setId("labelCited0");
-        GridPane.setConstraints(etiquetaTextoCited1, 1,6);
+        GridPane.setConstraints(etiquetaTextoCited1, 1,21);
 
         etiquetaTextoCited2 = new Label("to");
         etiquetaTextoCited2.setId("labelCited1");
-        GridPane.setConstraints(etiquetaTextoCited2, 3,6);
+        GridPane.setConstraints(etiquetaTextoCited2, 3,21);
 
         layout.getChildren().addAll(etiquetaTextoPublished1, etiquetaTextoPublished2, etiquetaTextoCited1,
                 etiquetaTextoCited2);

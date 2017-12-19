@@ -75,14 +75,14 @@ public class BusquedaBooleana {
 
             int total = cbCampos.size();
 
-            GridPane.setConstraints(campoTextoPublished1, 2, total + 2);
-            GridPane.setConstraints(campoTextoPublished2, 4, total + 2);
-            GridPane.setConstraints(campoTextoCited1, 2, total + 3);
-            GridPane.setConstraints(campoTextoCited2, 4, total + 3);
-            GridPane.setConstraints(etiquetaTextoPublished1, 1, total + 2);
-            GridPane.setConstraints(etiquetaTextoPublished2, 3, total + 2);
-            GridPane.setConstraints(etiquetaTextoCited1, 1, total + 3);
-            GridPane.setConstraints(etiquetaTextoCited2, 3, total + 3);
+            GridPane.setConstraints(campoTextoPublished1, 2, 20 + 2);
+            GridPane.setConstraints(campoTextoPublished2, 4, 20 + 2);
+            GridPane.setConstraints(campoTextoCited1, 2, 21 + 3);
+            GridPane.setConstraints(campoTextoCited2, 4, 21 + 3);
+            GridPane.setConstraints(etiquetaTextoPublished1, 1, 20 + 2);
+            GridPane.setConstraints(etiquetaTextoPublished2, 3, 20 + 2);
+            GridPane.setConstraints(etiquetaTextoCited1, 1, 21 + 3);
+            GridPane.setConstraints(etiquetaTextoCited2, 3, 21 + 3);
 
             cbCampos.add(new ChoiceBox(FXCollections.observableArrayList(
                     "All Fields", "Title", "Abstract", "Author" , "Source", "Keywords Index", "Keywords Author")
@@ -144,14 +144,14 @@ public class BusquedaBooleana {
                 botonMenos.setVisible(false);
             }
 
-            GridPane.setConstraints(campoTextoPublished1, 2,total+1);
-            GridPane.setConstraints(campoTextoPublished2, 4,total+1);
-            GridPane.setConstraints(campoTextoCited1, 2,total+2);
-            GridPane.setConstraints(campoTextoCited2, 4,total+2);
-            GridPane.setConstraints(etiquetaTextoPublished1, 1,total+1);
-            GridPane.setConstraints(etiquetaTextoPublished2, 3,total+1);
-            GridPane.setConstraints(etiquetaTextoCited1, 1,total+2);
-            GridPane.setConstraints(etiquetaTextoCited2, 3,total+2);
+            GridPane.setConstraints(campoTextoPublished1, 2,20+1);
+            GridPane.setConstraints(campoTextoPublished2, 4,20+1);
+            GridPane.setConstraints(campoTextoCited1, 2,21+2);
+            GridPane.setConstraints(campoTextoCited2, 4,21+2);
+            GridPane.setConstraints(etiquetaTextoPublished1, 1,20+1);
+            GridPane.setConstraints(etiquetaTextoPublished2, 3,20+1);
+            GridPane.setConstraints(etiquetaTextoCited1, 1,21+2);
+            GridPane.setConstraints(etiquetaTextoCited2, 3,21+2);
 
             layout.getChildren().removeAll(cbCampos.get(total - 1), campoTextoBuscar.get(total - 1),
                     cbBooleanos.get(total - 2));
@@ -187,6 +187,8 @@ public class BusquedaBooleana {
 
         try{
 
+            int anio, citedby;
+
             inicializarVolverBuscar();
 
             int i = -1;
@@ -214,9 +216,21 @@ public class BusquedaBooleana {
 
                 Document d = EscenaPrincipal.searcher.doc(sd.doc);
 
+                anio = 0;
+                if (d.get("year") != null) {
+                    anio = Integer.parseInt(d.get("year"));
+
+                }
+
+                citedby = 0;
+                if (d.get("cited by") != null) {
+                    citedby = Integer.parseInt(d.get("cited by"));
+
+                }
+
                 listaResultados.add(new Documento(d.get("author"), d.get("title"), d.get("abstract"), d.get("source"),
-                        d.get("link"), d.get("keywords author"), d.get("keywords index"),
-                        Integer.parseInt(d.get("year")), Integer.parseInt(d.get("cited by"))));
+                        d.get("link"), d.get("keywords author"), d.get("keywords index"), anio,
+                        citedby));
             }
 
             escenaResultados.crearTablaDatos(listaResultados,colectorFacetas);

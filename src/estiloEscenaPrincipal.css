@@ -1,7 +1,45 @@
-.label{
-    -fx-background-color: white;
+.root{
+    -fx-background-color: #34374c;
+    -fx-border-color: #2c2e3e;
 }
 
-/*.scroll-pane > .viewport{
-    -fx-background-color: #383838;
-}*/
+.scroll-pane > .viewport{
+    -fx-background-color: #34374c;
+}
+
+#labelPublished0{
+    -fx-text-fill: white;
+}
+
+#labelPublished1{
+    -fx-text-fill: white;
+}
+
+#labelCited0{
+    -fx-text-fill: white;
+}
+
+#labelCited1{
+    -fx-text-fill: white;
+}
+
+.button:hover{
+    -fx-text-fill: white;
+    -fx-background-color: #265a5c;
+    -fx-cursor: hand;
+}
+
+.choice-box:hover{
+    -fx-cursor: hand;
+}
+
+#botonBuscar {
+    -fx-border-color: inherit;
+}
+
+
+#botonBuscar:hover{
+    -fx-text-fill: white;
+    -fx-background-color: #40a798;
+    -fx-cursor: hand;
+}

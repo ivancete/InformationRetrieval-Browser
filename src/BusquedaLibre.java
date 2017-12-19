@@ -1,7 +1,10 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntPoint;
@@ -14,6 +17,14 @@ import java.util.ArrayList;
 
 public class BusquedaLibre {
 
+    Label etiquetaError;
+
+    //Este es el plan para cuando ocurre un error.
+    GridPane plan;
+
+    //Esta es la escena que hay dentro del plan para cuando ocurre un error.
+    Scene escenaErrorBusquedaBooleana;
+
     EscenaResultadosTexto escenaResultados;
 
     ArrayList<QueryParser> consulta;
@@ -25,6 +36,8 @@ public class BusquedaLibre {
     ObservableList<Documento> listaResultados;
 
     public BusquedaLibre(){
+
+        plan = new GridPane();
 
         escenaResultados = new EscenaResultadosTexto();
 
@@ -49,35 +62,55 @@ public class BusquedaLibre {
                               TextField campoTextoPublished2, TextField campoTextoCited1,
                               TextField campoTextoCited2) throws Exception{
 
-        inicializarVolverBuscar();
+        try{
+            int anio, citedby;
+
+            inicializarVolverBuscar();
+
+            String campoABuscar = campo.getValue().toString();
+
+            crearConsulta(contenido, campoABuscar, campoTextoPublished1, campoTextoPublished2, campoTextoCited1,
+                    campoTextoCited2);
 
 
-        String campoABuscar = campo.getValue().toString();
+            EscenaPrincipal.bq = bqbuilder.build();
 
-        crearConsulta(contenido, campoABuscar, campoTextoPublished1, campoTextoPublished2, campoTextoCited1,
-                campoTextoCited2);
+            FacetsCollector colectorFacetas = new FacetsCollector();
 
+            documentos = FacetsCollector.search(EscenaPrincipal.searcher, EscenaPrincipal.bq, 50, colectorFacetas);
 
-        EscenaPrincipal.bq = bqbuilder.build();
+            for (ScoreDoc sd : documentos.scoreDocs){
 
-        FacetsCollector colectorFacetas = new FacetsCollector();
+                Document d = EscenaPrincipal.searcher.doc(sd.doc);
 
-        documentos = FacetsCollector.search(EscenaPrincipal.searcher, EscenaPrincipal.bq, 100, colectorFacetas);
+                anio = 0;
+                if (d.get("year") != null) {
+                    anio = Integer.parseInt(d.get("year"));
 
+                }
 
+                citedby = 0;
+                if (d.get("cited by") != null) {
+                    citedby = Integer.parseInt(d.get("cited by"));
 
+                }
 
-        for (ScoreDoc sd : documentos.scoreDocs){
+                listaResultados.add(new Documento(d.get("author"), d.get("title"), d.get("abstract"), d.get("source"),
+                        d.get("link"), d.get("keywords author"), d.get("keywords index"), anio,
+                        citedby));
+            }
 
-            Document d = EscenaPrincipal.searcher.doc(sd.doc);
+            escenaResultados.crearTablaDatos(listaResultados, colectorFacetas);
 
-            listaResultados.add(new Documento(d.get("author"), d.get("title"), d.get("abstract"), d.get("source"),
-                    d.get("link"), d.get("keywords author"), d.get("keywords index"), Integer.parseInt(d.get("year")),
-                    Integer.parseInt(d.get("cited by"))));
+        }catch (Exception e){
+
+            etiquetaError = new Label("Se ha producido un error al realizar la búsqueda libre.");
+            plan.getChildren().add(etiquetaError);
+            escenaErrorBusquedaBooleana = new Scene(plan,400,400);
+            InterfazUsuario.window.setScene(escenaErrorBusquedaBooleana);
+            InterfazUsuario.window.setTitle("Error");
+            InterfazUsuario.window.show();
         }
-
-
-        escenaResultados.crearTablaDatos(listaResultados, colectorFacetas);
 
     }
 
