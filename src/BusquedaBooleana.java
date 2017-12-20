@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.IntPoint;
 import org.apache.lucene.facet.FacetsCollector;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -183,7 +184,11 @@ public class BusquedaBooleana {
     //Función que nos permite realizar la búsqueda booleana.
     public void busquedaBooleana(ArrayList<ChoiceBox<String> > cbCampos,
                                  ArrayList<TextField> campoTextoBuscar,
-                                 ArrayList<ChoiceBox<String> > cbBooleanos){
+                                 ArrayList<ChoiceBox<String> > cbBooleanos,
+                                 TextField campoTextoPublished1,
+                                 TextField campoTextoPublished2,
+                                 TextField campoTextoCited1,
+                                 TextField campoTextoCited2){
 
         try{
 
@@ -200,7 +205,8 @@ public class BusquedaBooleana {
                     valorLogico = cbBooleanos.get(i).getValue();
                 }
 
-                crearConsulta(campoTextoBuscar.get(i+1), valorLogico, campo.getValue());
+                crearConsulta(campoTextoBuscar.get(i+1), valorLogico, campo.getValue(), campoTextoPublished1, campoTextoPublished2,
+                        campoTextoCited1, campoTextoCited2);
 
                 i++;
             }
@@ -249,7 +255,12 @@ public class BusquedaBooleana {
 
     //Función que se encarga de dirigir hacia adonde va la consulta.
     //Crea una consulta u otra dependiendo el valor de la variable CAMPO.
-    public void crearConsulta(TextField contenido, String valorLogico, String campo) throws Exception{
+    public void crearConsulta(TextField contenido, String valorLogico, String campo, TextField campoTextoPublished1,
+                              TextField campoTextoPublished2, TextField campoTextoCited1,
+                              TextField campoTextoCited2) throws Exception{
+
+        crearConsultaRangoPublicacion(campoTextoPublished1, campoTextoPublished2);
+        crearConsultaRangoCitas(campoTextoCited1, campoTextoCited2);
 
         //En este primer bloque comprobamos que operador lógico requiere la subconsulta.
         BooleanClause.Occur operadorLogico = BooleanClause.Occur.SHOULD;
@@ -468,5 +479,49 @@ public class BusquedaBooleana {
             InterfazUsuario.window.show();
         }
 
+    }
+
+    public void crearConsultaRangoPublicacion(TextField campoTextoPublished1, TextField campoTextoPublished2){
+
+        if (campoTextoPublished1.getText().length() > 0 && campoTextoPublished2.getText().length() > 0){
+
+            Query qpublicacion = IntPoint.newRangeQuery("year",Integer.parseInt(campoTextoPublished1.getText()),
+                    Integer.parseInt(campoTextoPublished2.getText()));
+
+            BooleanClause bcPublicacion = new BooleanClause(qpublicacion, BooleanClause.Occur.MUST);
+
+            bqbuilder.add(bcPublicacion);
+
+        }
+        else if (campoTextoPublished1.getText().length() > 0 && campoTextoPublished2.getText().length() == 0){
+
+            Query qpublicacion = IntPoint.newExactQuery("year",Integer.parseInt(campoTextoPublished1.getText()));
+
+            BooleanClause bcPublicacion = new BooleanClause(qpublicacion, BooleanClause.Occur.MUST);
+
+            bqbuilder.add(bcPublicacion);
+
+        }
+    }
+
+    public void crearConsultaRangoCitas(TextField campoTextoCited1, TextField campoTextoCited2){
+
+        if (campoTextoCited1.getText().length() > 0 && campoTextoCited2.getText().length() > 0){
+
+            Query qcitas = IntPoint.newRangeQuery("cited by",Integer.parseInt(campoTextoCited1.getText()),
+                    Integer.parseInt(campoTextoCited2.getText()));
+
+            BooleanClause bcCitas = new BooleanClause(qcitas, BooleanClause.Occur.MUST);
+
+            bqbuilder.add(bcCitas);
+        }
+        else if (campoTextoCited1.getText().length() > 0 && campoTextoCited2.getText().length() == 0){
+
+            Query qcitas = IntPoint.newExactQuery("cited by",Integer.parseInt(campoTextoCited1.getText()));
+
+            BooleanClause bcCitas = new BooleanClause(qcitas, BooleanClause.Occur.MUST);
+
+            bqbuilder.add(bcCitas);
+        }
     }
 }

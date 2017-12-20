@@ -106,7 +106,8 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
         if (event.getSource()==botonBuscar && cbBooleanos.size() > 0){
 
             try {
-                busquedaBooleana.busquedaBooleana(cbCampos, campoTextoBuscar, cbBooleanos);
+                busquedaBooleana.busquedaBooleana(cbCampos, campoTextoBuscar, cbBooleanos, campoTextoPublished1, campoTextoPublished2,
+                        campoTextoCited1, campoTextoCited2);
             }catch (Exception e){
 
             }
