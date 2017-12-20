@@ -177,9 +177,11 @@ public class BusquedaLibre {
 
     public void crearConsultaPalabrasClaveIndex(TextField contenido) throws Exception{
 
-        Query consultaKeywordIndex = new TermQuery(new Term("keywords index",contenido.getText().toLowerCase()));
+        //Query consultaKeywordIndex = new TermQuery(new Term("keywords index",contenido.getText().toLowerCase()));
 
-        BooleanClause bcCitas = new BooleanClause(consultaKeywordIndex, BooleanClause.Occur.MUST);
+        Query fqconsultaKeywordIndex = new FuzzyQuery(new Term("keywords index",contenido.getText().toLowerCase()));
+
+        BooleanClause bcCitas = new BooleanClause(fqconsultaKeywordIndex, BooleanClause.Occur.MUST);
 
         bqbuilder.add(bcCitas);
 
@@ -187,18 +189,22 @@ public class BusquedaLibre {
 
     public void crearConsultaPalabrasClaveAutor(TextField contenido) throws Exception{
 
-        Query consultaKeywordAutor = new TermQuery(new Term("keywords author",contenido.getText().toLowerCase()));
+        //Query consultaKeywordAutor = new TermQuery(new Term("keywords author",contenido.getText().toLowerCase()));
 
-        BooleanClause bcCitas = new BooleanClause(consultaKeywordAutor, BooleanClause.Occur.MUST);
+        Query fqconsultaKeywordAuthor = new FuzzyQuery(new Term("keywords author",contenido.getText().toLowerCase()));
+
+        BooleanClause bcCitas = new BooleanClause(fqconsultaKeywordAuthor, BooleanClause.Occur.MUST);
 
         bqbuilder.add(bcCitas);
     }
 
     public void crearConsultaAutor(TextField contenido) throws Exception{
 
-        Query consultaAutor = new TermQuery(new Term("author",contenido.getText().toLowerCase()));
+        //Query consultaAutor = new TermQuery(new Term("author",contenido.getText().toLowerCase()));
 
-        BooleanClause bcCitas = new BooleanClause(consultaAutor, BooleanClause.Occur.MUST);
+        Query fqconsultaAuthor = new FuzzyQuery(new Term("author",contenido.getText().toLowerCase()));
+
+        BooleanClause bcCitas = new BooleanClause(fqconsultaAuthor, BooleanClause.Occur.MUST);
 
         bqbuilder.add(bcCitas);
     }

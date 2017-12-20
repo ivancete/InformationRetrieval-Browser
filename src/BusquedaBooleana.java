@@ -380,9 +380,11 @@ public class BusquedaBooleana {
 
         try{
 
-            Query q = new TermQuery(new Term("author",contenido.getText().toLowerCase()));
+            //Query q = new TermQuery(new Term("author",contenido.getText().toLowerCase()));
 
-            clausulasBooleanas.add(new BooleanClause(q,operadorLogico));
+            Query fqconsultaAuthor = new FuzzyQuery(new Term("author",contenido.getText().toLowerCase()));
+
+            clausulasBooleanas.add(new BooleanClause(fqconsultaAuthor,operadorLogico));
 
             bqbuilder.add(clausulasBooleanas.get(clausulasBooleanas.size()-1));
 
@@ -402,9 +404,11 @@ public class BusquedaBooleana {
 
         try{
 
-            Query q = new TermQuery(new Term("keywords index",contenido.getText().toLowerCase()));
+            //Query q = new TermQuery(new Term("keywords index",contenido.getText().toLowerCase()));
 
-            clausulasBooleanas.add(new BooleanClause(q,operadorLogico));
+            Query fqconsultaKeywordIndex = new FuzzyQuery(new Term("keywords index",contenido.getText().toLowerCase()));
+
+            clausulasBooleanas.add(new BooleanClause(fqconsultaKeywordIndex,operadorLogico));
 
             bqbuilder.add(clausulasBooleanas.get(clausulasBooleanas.size()-1));
 
@@ -424,9 +428,11 @@ public class BusquedaBooleana {
 
         try{
 
-            Query q2 = new TermQuery(new Term("keywords author",contenido.getText().toLowerCase()));
+            //Query q2 = new TermQuery(new Term("keywords author",contenido.getText().toLowerCase()));
 
-            clausulasBooleanas.add(new BooleanClause(q2,operadorLogico));
+            Query fqconsultaKeywordAuthor = new FuzzyQuery(new Term("keywords author",contenido.getText().toLowerCase()));
+
+            clausulasBooleanas.add(new BooleanClause(fqconsultaKeywordAuthor,operadorLogico));
 
             bqbuilder.add(clausulasBooleanas.get(clausulasBooleanas.size()-1));
 
