@@ -72,32 +72,35 @@ public class BusquedaLibre {
             crearConsulta(contenido, campoABuscar, campoTextoPublished1, campoTextoPublished2, campoTextoCited1,
                     campoTextoCited2);
 
-
             EscenaPrincipal.bq = bqbuilder.build();
 
             FacetsCollector colectorFacetas = new FacetsCollector();
 
             documentos = FacetsCollector.search(EscenaPrincipal.searcher, EscenaPrincipal.bq, 50, colectorFacetas);
 
-            for (ScoreDoc sd : documentos.scoreDocs){
 
-                Document d = EscenaPrincipal.searcher.doc(sd.doc);
+            if (documentos.totalHits > 0) {
 
-                anio = 0;
-                if (d.get("year") != null) {
-                    anio = Integer.parseInt(d.get("year"));
+                for (ScoreDoc sd : documentos.scoreDocs) {
 
+                    Document d = EscenaPrincipal.searcher.doc(sd.doc);
+
+                    anio = 0;
+                    if (d.get("year") != null) {
+                        anio = Integer.parseInt(d.get("year"));
+
+                    }
+
+                    citedby = 0;
+                    if (d.get("cited by") != null) {
+                        citedby = Integer.parseInt(d.get("cited by"));
+
+                    }
+
+                    listaResultados.add(new Documento(d.get("author"), d.get("title"), d.get("abstract"), d.get("source"),
+                            d.get("link"), d.get("keywords author"), d.get("keywords index"), anio,
+                            citedby));
                 }
-
-                citedby = 0;
-                if (d.get("cited by") != null) {
-                    citedby = Integer.parseInt(d.get("cited by"));
-
-                }
-
-                listaResultados.add(new Documento(d.get("author"), d.get("title"), d.get("abstract"), d.get("source"),
-                        d.get("link"), d.get("keywords author"), d.get("keywords index"), anio,
-                        citedby));
             }
 
             escenaResultados.crearTablaDatos(listaResultados, colectorFacetas);
@@ -149,9 +152,9 @@ public class BusquedaLibre {
 
         Query consultaTitulo = consulta.get(0).parse("title: "+contenido.getText());
 
-        BooleanClause bcCitas = new BooleanClause(consultaTitulo, BooleanClause.Occur.MUST);
+        BooleanClause bsTitulo = new BooleanClause(consultaTitulo, BooleanClause.Occur.MUST);
 
-        bqbuilder.add(bcCitas);
+        bqbuilder.add(bsTitulo);
 
     }
 
@@ -159,9 +162,9 @@ public class BusquedaLibre {
 
         Query consultaResumen = consulta.get(1).parse("abstract: "+contenido.getText());
 
-        BooleanClause bcCitas = new BooleanClause(consultaResumen, BooleanClause.Occur.MUST);
+        BooleanClause bdResumen = new BooleanClause(consultaResumen, BooleanClause.Occur.MUST);
 
-        bqbuilder.add(bcCitas);
+        bqbuilder.add(bdResumen);
 
     }
 
@@ -169,44 +172,53 @@ public class BusquedaLibre {
 
         Query consultaFuente = consulta.get(2).parse("source: "+contenido.getText());
 
-        BooleanClause bcCitas = new BooleanClause(consultaFuente, BooleanClause.Occur.MUST);
+        BooleanClause bcFuente = new BooleanClause(consultaFuente, BooleanClause.Occur.MUST);
 
-        bqbuilder.add(bcCitas);
+        bqbuilder.add(bcFuente);
 
     }
 
     public void crearConsultaPalabrasClaveIndex(TextField contenido) throws Exception{
 
-        //Query consultaKeywordIndex = new TermQuery(new Term("keywords index",contenido.getText().toLowerCase()));
+        String contenidoMinuscula = "";
 
-        Query fqconsultaKeywordIndex = new FuzzyQuery(new Term("keywords index",contenido.getText().toLowerCase()));
+        if (contenido.getText().length() > 0)
+            contenidoMinuscula = contenido.getText().toLowerCase();
 
-        BooleanClause bcCitas = new BooleanClause(fqconsultaKeywordIndex, BooleanClause.Occur.MUST);
+        Query fqconsultaKeywordIndex = new FuzzyQuery(new Term("keywords index",contenidoMinuscula));
 
-        bqbuilder.add(bcCitas);
+        BooleanClause bcKI = new BooleanClause(fqconsultaKeywordIndex, BooleanClause.Occur.MUST);
+
+        bqbuilder.add(bcKI);
 
     }
 
     public void crearConsultaPalabrasClaveAutor(TextField contenido) throws Exception{
 
-        //Query consultaKeywordAutor = new TermQuery(new Term("keywords author",contenido.getText().toLowerCase()));
+        String contenidoMinuscula = "";
 
-        Query fqconsultaKeywordAuthor = new FuzzyQuery(new Term("keywords author",contenido.getText().toLowerCase()));
+        if (contenido.getText().length() > 0)
+            contenidoMinuscula = contenido.getText().toLowerCase();
 
-        BooleanClause bcCitas = new BooleanClause(fqconsultaKeywordAuthor, BooleanClause.Occur.MUST);
+        Query fqconsultaKeywordAuthor = new FuzzyQuery(new Term("keywords author",contenidoMinuscula));
 
-        bqbuilder.add(bcCitas);
+        BooleanClause bcKA = new BooleanClause(fqconsultaKeywordAuthor, BooleanClause.Occur.MUST);
+
+        bqbuilder.add(bcKA);
     }
 
     public void crearConsultaAutor(TextField contenido) throws Exception{
 
-        //Query consultaAutor = new TermQuery(new Term("author",contenido.getText().toLowerCase()));
+        String contenidoMinuscula = "";
 
-        Query fqconsultaAuthor = new FuzzyQuery(new Term("author",contenido.getText().toLowerCase()));
+        if (contenido.getText().length() > 0)
+            contenidoMinuscula = contenido.getText().toLowerCase();
 
-        BooleanClause bcCitas = new BooleanClause(fqconsultaAuthor, BooleanClause.Occur.MUST);
+        Query fqconsultaAuthor = new FuzzyQuery(new Term("author",contenidoMinuscula));
 
-        bqbuilder.add(bcCitas);
+        BooleanClause bcAutor = new BooleanClause(fqconsultaAuthor, BooleanClause.Occur.MUST);
+
+        bqbuilder.add(bcAutor);
     }
 
     public void crearConsultaTodosCampos(TextField contenido) throws Exception{
@@ -226,19 +238,22 @@ public class BusquedaLibre {
 
         //Pasamos la entrada a minúscula para realizar la búsqueda por el campo Keywords y Autor.
 
-        String contenidoMinuscula = contenido.getText().toLowerCase();
+        String contenidoMinuscula = "";
 
-        Query qkindex = new TermQuery(new Term("keywords index",contenidoMinuscula));
+        if (contenido.getText().length() > 0)
+            contenidoMinuscula = contenido.getText().toLowerCase();
 
-        BooleanClause bc4 = new BooleanClause(qkindex,BooleanClause.Occur.SHOULD);
+        Query fqconsultaKeywordIndex = new FuzzyQuery(new Term("keywords index",contenidoMinuscula));
 
-        Query qkautor = new TermQuery(new Term("keywords author",contenidoMinuscula));
+        BooleanClause bc4 = new BooleanClause(fqconsultaKeywordIndex,BooleanClause.Occur.SHOULD);
 
-        BooleanClause bc5 = new BooleanClause(qkautor,BooleanClause.Occur.SHOULD);
+        Query fqconsultaKeywordAuthor = new FuzzyQuery(new Term("keywords author",contenidoMinuscula));
 
-        Query qautor = new TermQuery(new Term("author",contenidoMinuscula));
+        BooleanClause bc5 = new BooleanClause(fqconsultaKeywordAuthor,BooleanClause.Occur.SHOULD);
 
-        BooleanClause bc6 = new BooleanClause(qautor,BooleanClause.Occur.SHOULD);
+        Query fqconsultaAuthor = new FuzzyQuery(new Term("author",contenidoMinuscula));
+
+        BooleanClause bc6 = new BooleanClause(fqconsultaAuthor,BooleanClause.Occur.SHOULD);
 
         bqbuilder.add(bc1);
         bqbuilder.add(bc2);
@@ -271,7 +286,6 @@ public class BusquedaLibre {
 
         }
     }
-
     public void crearConsultaRangoCitas(TextField campoTextoCited1, TextField campoTextoCited2){
 
         if (campoTextoCited1.getText().length() > 0 && campoTextoCited2.getText().length() > 0){

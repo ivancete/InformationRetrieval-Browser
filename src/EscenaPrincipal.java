@@ -106,6 +106,10 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
         if (event.getSource()==botonBuscar && cbBooleanos.size() > 0){
 
             try {
+                for (TextField tf : campoTextoBuscar){
+                    if (tf.getText().length() == 0)
+                        return;
+                }
                 busquedaBooleana.busquedaBooleana(cbCampos, campoTextoBuscar, cbBooleanos, campoTextoPublished1, campoTextoPublished2,
                         campoTextoCited1, campoTextoCited2);
             }catch (Exception e){
@@ -117,7 +121,8 @@ public class EscenaPrincipal implements EventHandler<ActionEvent> {
 
             try {
 
-                busquedaLibre.busquedaLibre(cbCampos.get(0), campoTextoBuscar.get(0), campoTextoPublished1, campoTextoPublished2,
+                if (campoTextoBuscar.get(0).getText().length() > 0)
+                    busquedaLibre.busquedaLibre(cbCampos.get(0), campoTextoBuscar.get(0), campoTextoPublished1, campoTextoPublished2,
                         campoTextoCited1, campoTextoCited2);
 
             }catch (Exception e){

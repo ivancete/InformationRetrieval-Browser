@@ -41,9 +41,9 @@ public class EscenaResultadosTexto{
     ArrayList<TitledPane> tituloPanel;
 
     HBox escenaHorizontal;
-    VBox escenaVerticalFacetas;
+    VBox escenaVerticalFacetas, zonaizquierda;
 
-    Scene escenaTablaDatos;
+    Scene escenaTablaDatos, escenaDocumento;
 
     ScrollPane sp;
 
@@ -58,6 +58,8 @@ public class EscenaResultadosTexto{
         escenaHorizontal = new HBox();
         escenaHorizontal.minWidth(600);
         escenaVerticalFacetas  = new VBox();
+
+        zonaizquierda = new VBox();
 
         sp = new ScrollPane();
 
@@ -116,7 +118,9 @@ public class EscenaResultadosTexto{
 
         tablaDocumentos.setEditable(false);
 
-        escenaHorizontal.getChildren().setAll(totalDocumentosRescatados, botonVolver, tablaDocumentos, sp);
+        zonaizquierda.getChildren().setAll(totalDocumentosRescatados, botonVolver);
+
+        escenaHorizontal.getChildren().setAll(tablaDocumentos, sp, zonaizquierda);
 
         escenaTablaDatos = new Scene(escenaHorizontal);
     }
@@ -188,10 +192,9 @@ public class EscenaResultadosTexto{
         barraScrollVertical = new ScrollPane();
         barraScrollVertical.setContent(plan);
         barraScrollVertical.setContent(plan);
-        escenaTablaDatos = new Scene(barraScrollVertical, 600, 600);
-        ventana.setScene(escenaTablaDatos);
+        escenaDocumento = new Scene(barraScrollVertical, 600, 600);
+        ventana.setScene(escenaDocumento);
         ventana.show();
-
     }
 
     public void crearTablaDatos(ObservableList<Documento> listaDocumentos, FacetsCollector colectorFacetas) throws Exception{
@@ -212,11 +215,12 @@ public class EscenaResultadosTexto{
 
             tablaDocumentos.setItems(listaDocumentos);
 
+            System.out.println("Pasa");
+
             InterfazUsuario.window.setScene(escenaTablaDatos);
             InterfazUsuario.window.show();
 
         }catch (Exception e){
-
             etiquetaError = new Label("Se ha producido un error al intentar crear la tabla con los resultados de la búsqueda.");
             plan.getChildren().setAll(etiquetaError);
             escenaTablaDatos = new Scene(plan,400,400);
