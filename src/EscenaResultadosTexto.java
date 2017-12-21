@@ -55,7 +55,7 @@ public class EscenaResultadosTexto{
 
         //Parte de las facetas
 
-        escenaHorizontal = new HBox();
+        escenaHorizontal = new HBox(3);
         escenaHorizontal.minWidth(600);
         escenaVerticalFacetas  = new VBox();
 
@@ -68,24 +68,30 @@ public class EscenaResultadosTexto{
 
         TableColumn<Documento, String> autoresCol = new TableColumn<>("Author");
         autoresCol.setCellValueFactory(new PropertyValueFactory<>("autores"));
+        autoresCol.setVisible(false);
 
         TableColumn<Documento, String> tituloCol = new TableColumn<>("Title");
         tituloCol.setCellValueFactory(new PropertyValueFactory<>("titulo"));
 
         TableColumn<Documento, String> resumenCol = new TableColumn<>("Abstract");
         resumenCol.setCellValueFactory(new PropertyValueFactory<>("resumen"));
+        resumenCol.setVisible(false);
 
         TableColumn<Documento, String> fuenteCol = new TableColumn<>("Source");
         fuenteCol.setCellValueFactory(new PropertyValueFactory<>("fuente"));
+        fuenteCol.setVisible(false);
 
         TableColumn<Documento, String> linkCol = new TableColumn<>("Link");
         linkCol.setCellValueFactory(new PropertyValueFactory<>("link"));
+        linkCol.setVisible(false);
 
         TableColumn<Documento, String> palabrasClaveAutorCol = new TableColumn<>("Keywords Author");
         palabrasClaveAutorCol.setCellValueFactory(new PropertyValueFactory<>("palabrasClaveAutor"));
+        palabrasClaveAutorCol.setVisible(false);
 
         TableColumn<Documento, String> palabrasClaveIndiceCol = new TableColumn<>("Keywords Index");
         palabrasClaveIndiceCol.setCellValueFactory(new PropertyValueFactory<>("palabrasClaveIndice"));
+        palabrasClaveIndiceCol.setVisible(false);
 
         TableColumn<Documento, Integer> fechaPublicacionCol = new TableColumn<>("Date Published");
         fechaPublicacionCol.setCellValueFactory(new PropertyValueFactory<>("fechaPublicacion"));
@@ -116,11 +122,15 @@ public class EscenaResultadosTexto{
         tablaDocumentos.getColumns().addAll(autoresCol,tituloCol,resumenCol, fuenteCol, linkCol, palabrasClaveAutorCol,
                 palabrasClaveIndiceCol, fechaPublicacionCol, citadoPorCol);
 
+        tablaDocumentos.setMinWidth(1000);
+
         tablaDocumentos.setEditable(false);
+
+        sp.setMaxWidth(200);
 
         zonaizquierda.getChildren().setAll(totalDocumentosRescatados, botonVolver);
 
-        escenaHorizontal.getChildren().setAll(tablaDocumentos, sp, zonaizquierda);
+        escenaHorizontal.getChildren().setAll(zonaizquierda, sp, tablaDocumentos);
 
         escenaTablaDatos = new Scene(escenaHorizontal);
     }
@@ -130,13 +140,13 @@ public class EscenaResultadosTexto{
 
         Label autor;
         if (clickedRow.getFuente() != null)
-            autor = new Label("Autores:: "+clickedRow.getAutores());
+            autor = new Label("Autores:"+clickedRow.getAutores());
         else
             autor = new Label("Autores: No hay autores.");
 
         Label resumen;
         if (clickedRow.getFuente() != null)
-            resumen = new Label("Resumen:: "+clickedRow.getResumen());
+            resumen = new Label("Resumen: "+clickedRow.getResumen());
         else
             resumen = new Label("Resumen: No hay resumen.");
 
@@ -211,11 +221,9 @@ public class EscenaResultadosTexto{
 
             botonVolver.setOnAction(e -> InterfazUsuario.window.setScene(escena));
 
-            totalDocumentosRescatados.setText("Total documentos encontrados: "+Integer.toString(listaDocumentos.size()));
+            totalDocumentosRescatados.setText("Documentos: "+Integer.toString(listaDocumentos.size()));
 
             tablaDocumentos.setItems(listaDocumentos);
-
-            System.out.println("Pasa");
 
             InterfazUsuario.window.setScene(escenaTablaDatos);
             InterfazUsuario.window.show();
@@ -296,11 +304,12 @@ public class EscenaResultadosTexto{
 
             for (FacetResult fr : todasDimensiones) {
 
-                if (!fr.dim.contains("keywords")) {
+                //if (!fr.dim.contains("keywords")) {
 
                     tituloPanel.add(new TitledPane());
                     tituloPanel.get(i).setText(fr.dim);
                     tituloPanel.get(i).setExpanded(false);
+                    tituloPanel.get(i).setMaxWidth(150);
 
                     contenido.add(new VBox());
 
@@ -316,7 +325,7 @@ public class EscenaResultadosTexto{
                     tituloPanel.get(i).setContent(contenido.get(i));
 
                     i++;
-                }
+                //}
             }
 
             escenaVerticalFacetas.getChildren().setAll(tituloPanel);
